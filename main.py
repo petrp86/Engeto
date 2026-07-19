@@ -1,104 +1,111 @@
 import random
 
 
-def vytvor_cislo(cislo: int) -> str:
+def vytvor_cislo() -> str:
     """
-    Vytvoří náhodné čtyřciferné číslo
+    Vytvoří náhodné číslo, které nezačíná nulou
+    a číslice v něm se neopakují.
+    """    
+    while True:
+        cislo = "".join(random.sample(CISLICE, POCET_CIFER))
+        if cislo[0] != "0":
+            break
+    
+    return cislo
+
+
+def over_cislo(cislo: str) -> list:
     """
-    nahodne_cislo = str(random.choice(x))
-
-    return nahodne_cislo
-
-
-def overeni_cisla(cislo: str) -> bool:
-    """
-    Ověří správnost čísla dle požadavků:
-    1. musí mít správnou délku
-    2. musí to být číslo
+    Ověří správnost čísla a vrátí list chyb v zadání
+    dle požadavků:
+    1. nesmí být prázdný vstup
+    2. musí mít správnou délku
     3. nesmí začínat nulou ale může ji obsahovat
-    4. má unikátní číslice (nesmí se opakovat)
+    4. musí obsahovat pouze číslice
+    5. má unikátní číslice (nesmí se opakovat).
     """
-    set_cisla = set(cislo)
-    vstup_ok1 = False if len(cislo) != 4 else True
-    vstup_ok2 = False if not cislo.isdigit() else True
-    vstup_ok3 = False if cislo[0] == "0" else True
-    vstup_ok4 = False if len(set_cisla) != len(cislo) else True
-    vstup_ok = vstup_ok1 and vstup_ok2 and vstup_ok3 and vstup_ok4
+    chyby = []
+    if not cislo:
+        chyby.append("Nebylo nic zadáno!")
+    else:
+        if len(cislo) != POCET_CIFER:
+            chyby.append("Délka není správná!")
+        if cislo[0] == "0":
+            chyby.append("Číslo nesmí začínat nulou!")
+        if not cislo.isdigit():
+            chyby.append("Číslo může obsahovat pouze číslice!")
+        if cislo.isdigit() and len(cislo) != len(set(cislo)):
+            chyby.append("Číslice v čísle se nesmí opakovat!")    
+    
+    return chyby
 
-    return vstup_ok
 
-
-def bull(a: str,b: str) -> int:
+def bulls(a: str, b: str) -> int:
     """
-    Zjistí počet uhodnutých bull/bulls
+    Zjistí počet uhodnutých bulls.
     """
-    bulls = 0
-
+    pocet = 0
     for x, y in zip(a, b):
         if x == y:
-            bulls += 1
+            pocet += 1
 
-    return bulls
+    return pocet
 
 
-def cow(a: str, b: str) -> int:
+def cows(a: str, b: str) -> int:
     """
-    Zjistí počet uhodnutých cow/cows
+    Zjistí počet uhodnutých cows.
     """
-    set_nahodne_cislo = set(a)
-    set_zadane_cislo = set(b)
-    porovnani = set(set_nahodne_cislo & set_zadane_cislo)
-    cows = (len(porovnani)) - pocet_bulls
+    pocet = len(set(a) & set(b))
 
-    return cows
+    return pocet
 
 
-oddelovac = 55 * "-"    # Oddělovač textu a pokusů
-znova = "ano"
+# Délka oddělovače odpovídá nejdelšímu vypisovanému textu.
+ODDELOVAC = "-" * 55
+# Stanovení počtu cifer pro náhodné a zadané číslo.
+POCET_CIFER = 4
+# Povolené číslice pro generování náhodného čísla.
+CISLICE = "0123456789"
 
-print(f"""
-{oddelovac}
+def main():
+    print(f"""
+{ODDELOVAC}
 Ahoj!
-{oddelovac}
-Vygeneroval jsem pro tebe náhodné čtyřciferné číslo.
+{ODDELOVAC}
+Vygeneroval jsem pro tebe náhodné {POCET_CIFER}-ciferné číslo.
 Pojď si zahrát hru \"Bulls&Cows\".
-{oddelovac}""")
+{ODDELOVAC}""")
 
-while znova == "ano":
-    x = range(1000,9999)    # Rozsah pro vytvoření náhodného čísla
-    nahodne_ok = False
-    zadane_ok = False
+    nahodne_cislo = vytvor_cislo()
     pokus = 0
 
-    while not nahodne_ok:
-        nahodne_cislo = vytvor_cislo(x)    # Vytvoření náhodného čísla
-        nahodne_ok = overeni_cisla(nahodne_cislo)    # Ověření správných parametrů náhodného čísla
-
-    while not zadane_ok:
+    while True:
         if pokus == 0:
-            print("Zadej čtyřciferné číslo: ", oddelovac, sep="\n")    # Text pro první zadání uživatele
-            zadane_cislo = input()    # Vstup od uživatele
-        else:
-            zadane_cislo = input()    # Vstup od uživatele
+            print(f"Zadej {POCET_CIFER}-ciferné číslo:")
+            print(f"{ODDELOVAC}")
         pokus += 1
-        zadane_ok = overeni_cisla(zadane_cislo)    # Ověření správných parametrů zadaného čísla uživatelem
-        set_cisla = set(zadane_cislo)
-        vstup_ok1 = False if len(zadane_cislo) == 4 else print("Nezadal jsi správnou délku!")
-        vstup_ok2 = False if zadane_cislo.isdigit() else print("Nezadal jsi číslo!")
-        vstup_ok3 = False if zadane_cislo[0] != "0" else print("Číslo nesmí začínat nulou!")
-        vstup_ok4 = False if len(set_cisla) == len(zadane_cislo) else print("Číslice v čísle se nesmí opakovat!")
-        if not zadane_ok:
-            print("Zkus to znova: ", oddelovac, sep="\n")    # Text při vyhodnocení špatného zadání uživatele
+        zadane_cislo = input(">>>")
+        chyby_cisla = "\n".join(over_cislo(zadane_cislo))
+        if not chyby_cisla:
+            pocet_bulls = bulls(nahodne_cislo, zadane_cislo)
+            pocet_cows = cows(nahodne_cislo, zadane_cislo) - pocet_bulls
+            text_bull = "bull" if pocet_bulls == 1 else "bulls"
+            text_cow = "cow" if pocet_cows == 1 else "cows"
+            if pocet_bulls == POCET_CIFER:
+                print(f"Gratuluji! Náhodné číslo bylo odhaleno.")
+                print(f"Počet pokusů: {pokus}")
+                print(f"{ODDELOVAC}")
+                break
+            else:
+                print(f"{pocet_bulls} {text_bull}, {pocet_cows} {text_cow}")
+                print(f"{ODDELOVAC}")
         else:
-            pocet_bulls = bull(nahodne_cislo, zadane_cislo)    # Počet bulls
-            pocet_cows = cow(nahodne_cislo, zadane_cislo)    # Počet cows
-            text_bull = "bull" if pocet_bulls == 1 else "bulls"    # Rozlišení jednotného/množného čísla bull/bulls
-            text_cow = "cow" if pocet_cows == 1 else "cows"    # Rozlišení jednotného/množného čísla cow/cows
-            print(pocet_bulls, text_bull, ", ", pocet_cows, text_cow)
-            print(oddelovac)
-            zadane_ok = False if pocet_bulls != 4 else True    # Ukončení hádaní při uhodnutí čísla
-    else:
-        znova = "ne"
-        print(f"Gratuluji! Náhodné číslo bylo odhaleno.")
-        print(f"Počet pokusů: {pokus}")
-        znova = input("Chceš hrát znova? Zadej 'ano': ").lower()
+            print(f"{chyby_cisla}")
+            print(f"{ODDELOVAC}")
+            print(f"Zkus to znova:")
+            print(f"{ODDELOVAC}")
+
+
+if __name__ == "__main__":
+    main()
